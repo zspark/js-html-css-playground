@@ -1,0 +1,113 @@
+<html>
+
+<head>
+</head>
+
+<body>
+    <input id='inputText' type='text'></input>
+    <div id='output'></div>
+</body>
+
+<script src="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.31/dist/flexsearch.bundle.js">
+</script>
+<script>
+
+    /// see: https://github.com/mdn/yari/blob/main/client/src/search.tsx#L39
+
+    function splitQuery(term) {
+        return term
+            .trim()
+            .toLowerCase()
+            ///.replace(".", " .") // Allows to find `Map.prototype.get()` via `Map.get`.
+            .split(/[ ,]+/);
+    }
+
+    function HighlightMatch({title, q}) {
+        // Split on highlight term and include term into parts, ignore case.
+        const words = splitQuery(q);
+        // $& means the whole matched string
+        const regexWords = words.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+        const regex = regexWords.map((word) => `(${word})`).join("|");
+        const parts = title.split(new RegExp(regex, "gi"));
+        console.log(parts);
+        const _out = parts.filter(Boolean).map((part, i) => {
+            if (words.includes(part.toLowerCase())) {
+                return `<mark>${part}</mark>`;
+            } else {
+                return `<span>${part}</span>`;
+            }
+        })
+        console.log(_out);
+        return _out;
+        /*
+        return (
+            <b>
+                {parts.filter(Boolean).map((part, i) => {
+                    const key = `${part}:${i}`;
+                    if (words.includes(part.toLowerCase())) {
+                        return <mark key={key}>{part}</mark>;
+                    } else {
+                        return <span key={key}>{part}</span>;
+                    }
+                })}
+            </b>
+        );
+        */
+    }
+
+    const inputElem = document.querySelector("#inputText");
+    inputElem.onchange = e => {
+        // search (it will return an array of ids)
+        //const ids = index.search('Dou', 2);
+        const ids = index.search(inputElem.value);
+        // based on the ids returned by the index, look for the recipes for those ids
+        const result = recipes.filter((recipe) => ids.includes(recipe.id));
+        console.clear();
+
+        outputElem.replaceChildren();
+        let _outHTMLString = '';
+        result.forEach(ii => {
+            //console.debug(ii.id, ii.title);
+            const _out = HighlightMatch({title: ii.title, q: inputElem.value});
+            _outHTMLString += `<p>${_out.join('')}</p>`;
+        });
+        outputElem.innerHTML = _outHTMLString;
+    }
+    const outputElem = document.querySelector("#output");
+    const options = {
+        //charset: "latin:extra",
+        preset: 'match',
+        tokenize: 'forward',
+        cache: false,
+        filter: function (value) {
+            // just add values with length > 1 to the index
+            return value.length > 1;
+        }
+    }
+    const index = new FlexSearch.Index(options);
+
+    // my collection
+    const recipes = [
+        {id: 1, title: 'Orange cake'},
+        {id: 2, title: 'New York-Style Bacon Egg and Cheese Sandwich'},
+        {id: 3, title: 'Bacon Wrapped Cheese Stuffed Meatloaf'},
+        {id: 4, title: 'French Yogurt Cake'},
+        {id: 5, title: 'Gougeres (French Cheese Puffs)'},
+        {id: 6, title: 'Authentic Brazilian Cheese Bread (Pão de Queijo)'},
+        {id: 7, title: 'Camarão na Moranga (Brazilian Shrimp Stuffed Pumpkin)'},
+        {id: 8, title: 'Parmesan Cheese Muffins'},
+        {id: 9, title: 'Cookie Dough Stuffed Oreos'},
+        {id: 10, title: 'Cookie Dough Stuffed Oreos'},
+        {id: 11, title: 'igen iss Cookie Dough Stuffed Oreos'},
+        {id: 12, title: '2 Cookie Stuffe Dough Oreos'},
+    ]
+
+    // index my collection
+    recipes.forEach((recipe) => {
+        index.add(recipe.id, recipe.title)
+    })
+
+
+</script>
+
+</html>

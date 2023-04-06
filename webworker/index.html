@@ -1,0 +1,23 @@
+<html>
+
+<head>
+    <title>web worker testing</title>
+</head>
+
+<body>
+    <div>this is a litte web worker testing.</div>
+</body>
+<script>
+    //console.log(self instanceof WorkerGlobalScope);
+    console.log(typeof self );
+    function _workerCode() {
+        //console.log(self instanceof Window);
+        console.log(self instanceof WorkerGlobalScope);
+    }
+    //const _w = new Worker(`${_path}/workerCode.js`);
+    const _w = new Worker(URL.createObjectURL(
+        new Blob([`(${_workerCode.toString()})()`])
+    ));
+</script>
+
+</html>

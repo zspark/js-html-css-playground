@@ -1,0 +1,33 @@
+<html>
+
+<body>
+    <script>
+        function Add(a, b) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    let s = a + b;
+                    resolve(s);
+                }, 1000);
+            });
+        }
+        async function AsyncFn() {
+            let sum = await Add(10, 30);
+            console.log("promise returned, sum:", sum);
+        }
+
+        console.log("start to call AsyncFn");
+        AsyncFn();
+        console.log("end calling AsyncFn");
+
+        console.log("start to call AsyncFn again");
+        ///================================================================================
+        /// index.html:23 Uncaught SyntaxError: await is only valid in async functions and the top level bodies of modules
+        let sum = await Add(11, 31);
+        ///--------------------------------------------------------------------------------
+        console.log("promise returned, sum:", sum);
+        console.log("end calling AsyncFn again");
+    </script>
+</body>
+
+</html>
+

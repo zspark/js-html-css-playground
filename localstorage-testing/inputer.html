@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>localStorage-testing-inputer</title>
+</head>
+
+<body>
+    <p>Input some text for testing</p>
+    <input id="inputer" type="text"></input>
+    <script>
+        let _inputer = document.getElementById("inputer");
+        if (_inputer) {
+            _inputer.addEventListener("input", () => {
+                window.localStorage.setItem("localStorage-testing", "from-inputter");
+                window.localStorage.removeItem("localStorage-testing");
+            });
+        }
+    </script>
+</body>
+
+
+</html>

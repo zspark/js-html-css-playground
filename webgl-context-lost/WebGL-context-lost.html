@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>testing webgl context lost</title>
+</head>
+
+<body>
+    <canvas id='canvas' width="600" height="400"></canvas>
+    <button id='restore'>restore</button>
+    <button id='lost'>lost</button>
+</body>
+
+<script>
+    let _ext;
+    const _e = document.querySelector("#canvas");
+    if (_e) {
+
+        let _gl = _e.getContext('webgl2');
+        if (_gl) {
+
+            let bbb = {
+                aaa: 1,
+                canvas: _e,
+                gl: _gl,
+            }
+            window.bbb = bbb;
+
+            _e.addEventListener("webglcontextlost", _evt => {
+                _evt.preventDefault();//// 这一句非常重要，不阻止的话。浏览器继续执行后会不能恢复；
+                console.info(`context lost event triggered. is context lost:${_gl.isContextLost()}`);
+            }, false);
+            _e.addEventListener("webglcontextrestored", evt => {
+                console.info(`context restored event triggered. is context lost:${_gl.isContextLost()}`);
+
+                _gl = _e.getContext('webgl2');
+            }, false);
+
+            console.info(`context created. is context lost:${_gl.isContextLost()}`);
+
+            const _tex = _gl.createTexture();
+            bbb.tex = _tex;
+
+
+
+
+
+
+
+
+
+
+
+            _ext = _gl.getExtension('WEBGL_lose_context');
+            document.querySelector('#lost').onclick = _ => {
+                if (!_gl.isContextLost()) {
+                    _ext.loseContext();
+                }
+            }
+            document.querySelector('#restore').onclick = _ => {
+                if (_gl.isContextLost()) {
+                    _ext.restoreContext();
+                }
+            }
+        }
+    }
+</script>
+
+</html>
