@@ -2,7 +2,7 @@
 
 <head>
     <title>
-        FlexSearch - Index
+        FlexSearch - Document
     </title>
     <style>
         p {
@@ -16,10 +16,6 @@
 </head>
 
 <body>
-    <div>
-        <p>files to search:</p>
-        <div id='list'> </div>
-    </div>
     <div>
         <div>
             <label>preset:</label>
@@ -49,6 +45,7 @@
 
 <script src="https://rawcdn.githack.com/nextapps-de/flexsearch/0.7.31/dist/flexsearch.bundle.js">
 </script>
+<script src="./mock-data.js"> </script>
 <script>
 
     /// see: https://github.com/mdn/yari/blob/main/client/src/search.tsx#L39
@@ -82,7 +79,8 @@
 
     function Search() {
         const ids = index.search(inputElem.value);
-        const result = recipes.filter((recipe) => ids.includes(recipe.id));
+        console.log(ids);
+        const result = window.mockData.filter((recipe) => ids.includes(recipe.id));
         //console.clear();
 
         outputElem.replaceChildren();
@@ -98,29 +96,17 @@
     const inputElem = document.querySelector("#inputText");
     inputElem.onkeyup = Search;
 
-    // my collection
-    const recipes = [
-        {id: 1, title: 'Orange cake', tag: 'tagA,tagB', desc: "new work egg and sand"},
-        {id: 2, title: 'New York-Style Bacon Egg and Cheese Sandwich', tag: 'tagA', desc: "cookes srogrimp"},
-        {id: 3, title: 'Bacon Wrapped Cheese Stuffed Meatloaf', tag: 'tagA,tagB', desc: "cheese tagZ is ii yogurt"},
-        {id: 4, title: 'French Yogurt Cake', tag: 'tagA,tagC', desc: "work parmen and is you"},
-        {id: 5, title: 'Gougeres (French Cheese Puffs)', tag: 'tagE,tagB', desc: "whom you like first work and sand"},
-        {id: 6, title: 'Authentic Brazilian Cheese Bread (Pão de Queijo)', tag: 'tagB', desc: "into camer dough shttno is sand"},
-        {id: 7, title: 'Camarão in into (Brazilian Shrimp Stuffed Pumpkin)', tag: 'tagZ', desc: "s2gie and dough orges"},
-        {id: 8, title: 'Parmesan Cheese Muffins', tag: 'tagZ', desc: "new amerian egg bacon oreos"},
-        {id: 9, title: 'Cookie Dough Stuffed Oreos', tag: 'tagC', desc: "bfirch authentic egg and sand"},
-        {id: 10, title: 'Cookie Dough Stuffed Oreos', tag: 'tagE', desc: "new whous egg and sand"},
-        {id: 11, title: 'a a a a a is is is is i i i i i', tag: 'taga,tagb', desc: " and sand"},
-        {id: 12, title: '2 Cookie Stuffe Dough Oreos', tag: 'taga,tagb', desc: "conennnn and sand"},
-    ]
-
-    let _listHTMLStr = '<ul>';
-    recipes.forEach(v => {
-        _listHTMLStr += `<li>${v.title}</li>`;
-    });
-    _listHTMLStr += '</ul>';
-    const listElem = document.querySelector("#list");
-    listElem.innerHTML = _listHTMLStr;
+    function DisplayMockData() {
+        let _listHTMLStr = '<ul>';
+        window.mockData.forEach(v => {
+            _listHTMLStr += `<li>${v.title}</li>`;
+        });
+        _listHTMLStr += '</ul>';
+        const listElem = document.createElement('div');
+        listElem.innerHTML = _listHTMLStr;
+        document.body.prepend(listElem);
+    }
+    DisplayMockData();
 
     let index;
 
@@ -135,30 +121,22 @@
                 depth: parseInt(document.querySelector('#depth').value),
             },
             minlength: parseInt(document.querySelector('#minlength').value),
-            /*
-            filter: function (value) {
-                console.log(value);
-                // just add values with length > 1 to the index
-                return value.length > 2;
-            }
-            */
-            filter: [
-                "in",
-                "into",
-                "is",
-                "isn't",
-                "it",
-                "it's",
-                "a",
-                "i",
-            ]
-            /*
-            */
+            filter: ["in", "into", "is", "isn't", "it", "it's", "a", "i",]
         }
-        index = new FlexSearch.Index(options);
-        // index my collection
-        recipes.forEach((recipe) => {
-            index.add(recipe.id, recipe.title)
+
+        const _oA = JSON.parse(JSON.stringify(options)); _oA.field = "title";
+        const _oB = JSON.parse(JSON.stringify(options)); _oB.field = "desc";
+        index = new FlexSearch.Document({
+            document: {
+                id: "id",
+                tag: "tag",
+                index: [_oA, _oB],
+                store: ['title', 'desc'],
+                bool: "and",
+            }
+        });
+        window.mockData.forEach((recipe) => {
+            index.add(recipe.id, recipe)
         })
         return index;
     }
