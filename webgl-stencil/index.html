@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>memory testing</title>
+</head>
+
+<body>
+    <canvas width="600" height="600" id="my_Canvas"></canvas>
+    <div>
+        <input type="button" value="Draw Rect(depth=0)" onclick="drawRect()"><br />
+        <input type="button" value="Draw Rect(depth=0.5)" onclick="drawRectDepthDot5()"><br />
+        device mem size (Bytes): <span id="device">0</span><br />
+        device mem size (Kib): <span id="deviceK">0</span><br />
+        device mem size (Mib): <span id="deviceM">0</span><br />
+        device mem size (Gib): <span id="deviceG">0</span><br />
+        host mem Size (Bytes): <span id="host">0</span><br />
+        host mem Size (Kib): <span id="hostK">0</span><br />
+        host mem Size (Mib): <span id="hostM">0</span><br />
+        host mem Size (Gib): <span id="hostG">0</span>
+    </div>
+
+    <script>
+        function id(name) {return document.getElementById(name);}
+        function drawRectDepthDot5() {
+            const _Depth = -0.5;
+            let vertices = [];
+            vertices.push(
+                /// position;
+                0.6, 0.6, _Depth,
+                0.0, 0.6, _Depth,
+                0.0, -0.6, _Depth
+                ,
+                0.0, -0.6, _Depth,
+                0.6, -0.6, _Depth,
+                0.6, 0.6, _Depth,
+
+                /// color
+                1.0, 0.0, 0.0,
+                1.0, 0.0, 0.0,
+                1.0, 0.0, 0.0
+                ,
+                1.0, 0.0, 0.0,
+                1.0, 0.0, 0.0,
+                1.0, 0.0, 0.0,
+            );
+            // Create a new buffer object
+            const _f32 = new Float32Array(vertices);
+            const vertex_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, _f32, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            _stencil_2_vb = vertex_buffer;
+
+            _f32.length = 0;
+            vertices.length = 0;
+        }
+        function drawRect() {
+            let vertices = [];
+            vertices.push(
+                /// position;
+                0.5, 0.5, 0.0,
+                -0.5, 0.5, 0.0,
+                -0.5, -0.5, 0.0
+                ,
+                -0.5, -0.5, 0.0,
+                0.5, -0.5, 0.0,
+                0.5, 0.5, 0.0,
+
+                /// color
+                1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0
+                ,
+                1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0,
+            );
+            // Create a new buffer object
+            const _f32 = new Float32Array(vertices);
+            const vertex_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, _f32, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            _stencil_1_vb = vertex_buffer;
+
+            _f32.length = 0;
+            vertices.length = 0;
+        }
+
+        function _createProgram() {
+            // Vertex shader source code
+            const vertCode = `
+precision mediump float;
+attribute vec3 a_position;
+attribute vec3 a_color;
+
+varying vec3 v_color;
+void main(void) {
+    v_color = a_color;
+    gl_Position = vec4(a_position, 1.0);
+    gl_PointSize = 2.0;
+}`;
+            const vertShader = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vertShader, vertCode);
+            gl.compileShader(vertShader);
+            let message = gl.getShaderInfoLog(vertShader);
+            if (message.length > 0) {
+                throw message;
+            }
+
+
+            const fragCode = `
+precision mediump float;
+varying vec3 v_color;
+void main(void) {
+    gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0);
+    gl_FragColor = vec4(v_color, 1.0);
+}`;
+            const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fragShader, fragCode);
+            gl.compileShader(fragShader);
+            message = gl.getShaderInfoLog(fragShader);
+            if (message.length > 0) {
+                throw message;
+            }
+
+
+            const shaderProgram = gl.createProgram();
+            gl.attachShader(shaderProgram, vertShader);
+            gl.attachShader(shaderProgram, fragShader);
+            gl.linkProgram(shaderProgram);
+            gl.validateProgram(shaderProgram);
+
+            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                const info = gl.getProgramInfoLog(shaderProgram);
+                throw `Could not compile WebGL program. \n\n${info}`;
+            }
+
+            return shaderProgram;
+        }
+
+        function _renderVB(vb) {
+            if (!vb) return;
+            gl.bindBuffer(gl.ARRAY_BUFFER, vb);
+            const _pos = gl.getAttribLocation(shaderProgram, "a_position");
+            gl.vertexAttribPointer(_pos, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(_pos);
+
+            const _color = gl.getAttribLocation(shaderProgram, "a_color");
+            gl.vertexAttribPointer(_color, 3, gl.FLOAT, false, 0, 4 * 3 * 6);
+            gl.enableVertexAttribArray(_color);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+        }
+
+        function _render() {
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            const _mask = 0b0011;
+            gl.stencilMask(_mask);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilMask
+            /*
+            */
+            gl.stencilFunc(gl.ALWAYS, 0xff, 0xff);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilFunc
+            //gl.stencilOp(gl.REPLACE, gl.REPLACE, gl.REPLACE);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilOp
+            //gl.stencilOp(gl.INCR_WRAP, gl.INCR_WRAP, gl.INCR_WRAP);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilOp
+            gl.stencilOp(gl.INCR, gl.INCR, gl.INCR);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilOp
+            _renderVB(_stencil_1_vb);
+
+            gl.stencilFunc(gl.EQUAL, 0b10, 0b01);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilFunc
+            //gl.stencilOp(gl.KEEP, gl.KEEP, gl.DECR_WRAP);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilOp
+            gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilOp
+            _renderVB(_stencil_2_vb);
+
+            requestAnimationFrame(_render);
+        }
+
+
+        let _stencil_1_vb;
+        let _stencil_2_vb;
+        const canvas = document.getElementById('my_Canvas');
+        const gl = canvas.getContext('webgl2', {depth: true, stencil: true});//https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext
+        const shaderProgram = _createProgram();
+        gl.useProgram(shaderProgram);
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clearStencil(0b1111);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/clearStencil
+        gl.disable(gl.DEPTH_TEST);
+        gl.enable(gl.STENCIL_TEST);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+
+        requestAnimationFrame(_render);
+
+    </script>
+</body>
+
+</html>

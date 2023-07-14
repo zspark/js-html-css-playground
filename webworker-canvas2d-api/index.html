@@ -1,0 +1,71 @@
+<html>
+
+<head>
+    <title>web worker testing</title>
+</head>
+
+<body>
+    <div>this is a litte web worker testing.</div>
+    <canvas id="canvas">your broswer doest support 2d </canvas>
+</body>
+<script>
+    //console.log(self instanceof WorkerGlobalScope);
+    console.log(typeof self);
+    function _workerCode() {
+        //console.log(self instanceof Window);
+        console.log(self instanceof WorkerGlobalScope);
+
+
+        onmessage = function (evt) {
+            const canvas = evt.data.canvas;
+            const ctx = canvas.getContext("2d", {willReadFrequently: true});/// if `willReadFrequently` is true, then u will see no render on screen;
+            //const ctx = canvas.getContext("2d");
+            ctx.font = "78px serif";
+
+            console.log("worker console loop");
+            function render(time) {
+                console.time("loop");
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (1) {
+                    const _text = "Hello World";
+                    ctx.strokeStyle = "#ff0000";
+                    ctx.strokeText(_text, 10, 50);
+                    ctx.fillStyle = "#00ff00";
+                    ctx.fillText(_text, 10, 50);
+                }
+
+                if (0) {
+                    //ctx.fillStyle = "green";
+                    ctx.fillStyle = "#00ff00";
+                    ctx.fillRect(0, 0, 150, 100);
+                }
+
+
+                const _data = ctx.getImageData(0, 0, 50, 50);
+                postMessage(_data);
+                requestAnimationFrame(render);
+                console.timeEnd("loop");
+            }
+
+            requestAnimationFrame(render);
+            //render();
+        };
+    }
+
+
+    var htmlCanvas = document.getElementById("canvas");
+    //htmlCanvas.remove();
+    var offscreen = htmlCanvas.transferControlToOffscreen();
+    const worker = new Worker(URL.createObjectURL(
+        new Blob([`(${_workerCode.toString()})()`])
+    ));
+    worker.postMessage({canvas: offscreen}, [offscreen]);
+    worker.onmessage = function (evt) {
+        const _imageData = evt.data;
+        console.log(_imageData);
+    }
+</script>
+
+</html>

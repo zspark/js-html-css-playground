@@ -1,0 +1,55 @@
+<html lang="ja">
+
+<head>
+    <title>Calc Memory Limit</title>
+    <script type="text/javascript">
+        var count = 0;		// How many 1MByte strings do we have in our possession?
+        var globalVar = [];	// The destination for storing the 1MByte string
+        function getRandomInt(min, max) {return Math.floor(Math.random() * Math.floor(max - min) + min);}
+        function id(name) {return document.getElementById(name);}
+        function calc() {
+            try {
+                let genBuffer = "";
+                for (i = 0; i < (1024 * 1024) / 16; i++) {
+                    genBuffer += getRandomInt(12345678, 99999999).toString();
+                }
+                globalVar[count] = genBuffer;	// Store a 1MByte string
+                count++;						// count up
+                id("addmemorysize").innerHTML = genBuffer.length * 2;
+
+                let _inBytes = (genBuffer.length * count * 2);
+                id("memorysize").innerHTML = _inBytes;
+                id("memorysizeK").innerHTML = _inBytes / 1024;
+                id("memorysizeM").innerHTML = _inBytes / 1024 / 1024;
+                id("memorysizeG").innerHTML = _inBytes / 1024 / 1024 / 1024;
+
+                _inBytes = window.performance.memory.usedJSHeapSize;
+                id("usedJSHeap").innerHTML = _inBytes;
+                id("usedJSHeapK").innerHTML = _inBytes / 1024;
+                id("usedJSHeapM").innerHTML = _inBytes / 1024 / 1024;
+                id("usedJSHeapG").innerHTML = _inBytes / 1024 / 1024 / 1024;
+                setTimeout(calc, 10);			// Recall in 1msec
+            } catch (e) {	 // Out-Of-Memory Check to see if the exception can be caught
+                console.error("name=" + e.name + ", message=" + e.message);
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Calc Memory Limit:</h1>
+    <div>
+        <input type="button" value="Start Calc" onclick="calc()"><br />
+        Buffer Unit Length: <span id="addmemorysize">0</span>Bytes / 10msec<br />
+        Used Buffer Length (Bytes): <span id="memorysize">0</span><br />
+        Used Buffer Length (Kib): <span id="memorysizeK">0</span><br />
+        Used Buffer Length (Mib): <span id="memorysizeM">0</span><br />
+        Used Buffer Length (Gib): <span id="memorysizeG">0</span><br />
+        Used JS Heap Size (Bytes): <span id="usedJSHeap">0</span><br />
+        Used JS Heap Size (Kib): <span id="usedJSHeapK">0</span><br />
+        Used JS Heap Size (Mib): <span id="usedJSHeapM">0</span><br />
+        Used JS Heap Size (Gib): <span id="usedJSHeapG">0</span>
+    </div>
+</body>
+
+</html>

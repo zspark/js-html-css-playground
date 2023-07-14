@@ -1,0 +1,25 @@
+<html lang="ja">
+
+<head>
+    <title>GC</title>
+    <script type="text/javascript">
+        window.__gcTest__ = [];
+        function FreeGlobal() {
+            window.__gcTest__.length = 0;
+        }
+        function AddToGlobal() {
+            const _ab = new Float32Array(1024 * 1024 * 10);
+            window.__gcTest__.push(_ab);
+        }
+    </script>
+</head>
+
+<body>
+    <h1>GC test:</h1>
+    <div>
+        <input type="button" value="add 40Mib to Global" onclick="AddToGlobal()"><br />
+        <input type="button" value="free Global" onclick="FreeGlobal()"><br />
+    </div>
+</body>
+
+</html>
