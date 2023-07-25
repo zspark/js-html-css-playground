@@ -156,18 +156,21 @@ void main(void) {
 
         function _render() {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.depthMask(true);
 
-            const _mask = 0b0011;
+            //const _mask = 0b0011;
+            const _mask = 0xFF;
             gl.stencilMask(_mask);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilMask
             /*
             */
-            gl.stencilFunc(gl.ALWAYS, 0xff, 0xff);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilFunc
-            //gl.stencilOp(gl.REPLACE, gl.REPLACE, gl.REPLACE);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilOp
+            gl.stencilFunc(gl.ALWAYS, 0b10, 0xff);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilFunc
+            gl.stencilOp(gl.REPLACE, gl.REPLACE, gl.REPLACE);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilOp
             //gl.stencilOp(gl.INCR_WRAP, gl.INCR_WRAP, gl.INCR_WRAP);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilOp
-            gl.stencilOp(gl.INCR, gl.INCR, gl.INCR);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilOp
+            //gl.stencilOp(gl.INCR, gl.INCR, gl.INCR);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilOp
             _renderVB(_stencil_1_vb);
 
-            gl.stencilFunc(gl.EQUAL, 0b10, 0b01);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilFunc
+            gl.depthMask(false);
+            gl.stencilFunc(gl.EQUAL, 0b10, 0b10);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilFunc
             //gl.stencilOp(gl.KEEP, gl.KEEP, gl.DECR_WRAP);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilOp
             gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilOp
             _renderVB(_stencil_2_vb);
@@ -183,8 +186,8 @@ void main(void) {
         const shaderProgram = _createProgram();
         gl.useProgram(shaderProgram);
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        gl.clearStencil(0b1111);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/clearStencil
-        gl.disable(gl.DEPTH_TEST);
+        gl.clearStencil(0b00);//https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/clearStencil
+        gl.enable(gl.DEPTH_TEST);
         gl.enable(gl.STENCIL_TEST);
         gl.viewport(0, 0, canvas.width, canvas.height);
 

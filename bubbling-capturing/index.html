@@ -1,0 +1,31 @@
+<html>
+
+<head>
+</head>
+
+<body>
+    <h1> bubbling and capturing</h1>
+
+    <div>
+        <div id='a-1' style='width:200px;height:200px;background-color:#ff0000'>
+                id=a-1
+            <div id='a-2' style='width:100px;height:100px;background-color:#880000'>
+                id=a-2
+            </div>
+        </div>
+        <div id='b-1' style='width:200px;height:200px;background-color:#00ff0088;position:fixed;left:20px;top:40px'>
+                id=b-1
+            <div id='b-2' style='width:100px;height:100px;background-color:#00880088'>
+                id=b-2
+            </div>
+        </div>
+    </div>
+    <script>
+        document.querySelector('#a-1').onclick=evt=>{ console.log('a-1'); }
+        document.querySelector('#a-2').onclick=evt=>{ console.log('a-2'); }
+        document.querySelector('#b-1').onclick=evt=>{ console.log('b-1'); }
+        document.querySelector('#b-2').onclick=evt=>{ console.log('b-2'); }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>memory testing</title>
+</head>
+
+<body>
+    <canvas id="c"></canvas>
+    <div id="info"></div>
+    <script src="https://greggman.github.io/webgl-memory/webgl-memory.js" crossorigin></script>
+    <script>
+        const ext = gl.getExtension('GMAN_webgl_memory');
+        if (ext) {
+            const info = ext.getMemoryInfo();
+        }
+    </script>
+</body>
+
+</html>
