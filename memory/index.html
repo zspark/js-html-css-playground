@@ -49,6 +49,11 @@
     </div>
 
     <script>
+        if (window.gc) {
+            //console.log(`gc ...`);
+            //window.gc();
+        }
+
         let _h;
         function Pause() {
             _h && clearInterval(_h);
@@ -56,16 +61,6 @@
         }
 
         const M = 1024 * 1024 * 100 / 2 / 4;//10000000;
-        let vertices = [];
-        for (let i = 0; i < M; ++i) {
-            vertices.push(
-                (Math.random()) * 2.0 - 1.0,
-                (Math.random()) * 2.0 - 1.0
-            );
-        }
-        const _f32 = new Float32Array(vertices);
-        vertices.length = 0;
-        console.log(`size of vertiecs in bytes:${_f32.length * _f32.BYTES_PER_ELEMENT}`);
         function getRandomInt(min, max) {return Math.floor(Math.random() * Math.floor(max - min) + min);}
         function id(name) {return document.getElementById(name);}
         function IncreaseC() {
@@ -73,24 +68,40 @@
             for (i = 0; i < (1024 * 1024) / 16; i++) {
                 genBuffer += getRandomInt(12345678, 99999999).toString();
             }
-            globalVar.push(genBuffer);
+            window.globalVar.push(genBuffer);
 
             const _inBytes = window.performance.memory.usedJSHeapSize;
-            //const _inBytes = globalVar.length * 1024 * 1024;
+            //const _inBytes = window.globalVar.length * 1024 * 1024;
             id("host").innerHTML = `${_inBytes} Bytes, ${_inBytes / 1024} Kib, ${_inBytes / 1024 / 1024} Mib, ${_inBytes / 1024 / 1024 / 1024} Gib`;
         }
         function releaseAll() {
-            _arrVb.forEach(vb=>{
+        }
+        function releaseAll() {
+            _arrVb.forEach(vb => {
                 gl.deleteBuffer(vb);
             });
             _arrVb.length = 0;
+            //window.globalVar.length = 0;
         }
         function AutoC() {
             _h = setInterval(() => {
                 IncreaseC();
             }, 10);
         }
+        let _f32;
         function IncreaseG() {
+            if (!_f32) {
+                let vertices = [];
+                for (let i = 0; i < M; ++i) {
+                    vertices.push(
+                        (Math.random()) * 2.0 - 1.0,
+                        (Math.random()) * 2.0 - 1.0
+                    );
+                }
+                _f32 = new Float32Array(vertices);
+                vertices.length = 0;
+                console.log(`size of vertiecs in bytes:${_f32.length * _f32.BYTES_PER_ELEMENT}`);
+            }
             const vertex_buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
             gl.bufferData(gl.ARRAY_BUFFER, _f32, gl.STATIC_DRAW);
@@ -156,7 +167,7 @@ void main(void) {
         }
 
 
-        const globalVar = [];
+        window.globalVar = [];
         const _arrVb = [];
         const _arrC = [];
         const canvas = document.getElementById('my_Canvas');
