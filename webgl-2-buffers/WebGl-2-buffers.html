@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>webgl-2-buffers</title>
+    <script src='../utils/utils-webgl.js'></script>
+</head>
+
+<body>
+    <canvas width="1024" height="1024" id="my_Canvas"></canvas>
+
+    <script>
+        const vertCode = `
+attribute vec2 a_pos;
+attribute vec3 a_color;
+
+varying vec3 v_color;
+
+void main(void) {
+    v_color = a_color;
+    gl_Position = vec4(a_pos,0.0, 1.0);
+}`;
+        const fragCode = `
+precision highp float;
+varying vec3 v_color;
+
+void main(void) {
+    gl_FragColor = vec4(v_color,1.0);
+}`
+
+        const WebGLUtil = window.WebGLUtil;
+        const canvas = document.getElementById('my_Canvas');
+        const gl = canvas.getContext('webgl2');
+        WebGLUtil.setupBasicState(gl, canvas.width, canvas.height);
+        const _sp = WebGLUtil.createProgram(gl, vertCode, fragCode);
+        gl.enable(gl.DEPTH_TEST);
+
+
+
+        {
+            /// a buffer containing positions of vertices;
+            const _pos = [
+                -0.5, 0.5,
+                -0.5, -0.5,
+                0.5, -0.5,
+            ];
+            const _pos_buf = WebGLUtil.createBuffer(gl, gl.ARRAY_BUFFER, _pos);
+            gl.bindBuffer(gl.ARRAY_BUFFER, _pos_buf);
+            const _loc = gl.getAttribLocation(_sp, "a_pos");
+            gl.vertexAttribPointer(_loc, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(_loc);
+        }
+        {
+            /// a buffer containing colors of vertices;
+            const _color = [
+                1, 0, 0,
+                0, 1, 0,
+                0, 0, 1,
+            ];
+            const _color_buf = WebGLUtil.createBuffer(gl, gl.ARRAY_BUFFER, _color);
+            gl.bindBuffer(gl.ARRAY_BUFFER, _color_buf);
+            const _loc = gl.getAttribLocation(_sp, "a_color");
+            gl.vertexAttribPointer(_loc, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(_loc);
+        }
+
+
+        // Draw the triangle
+        gl.useProgram(_sp);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+    </script>
+</body>
+
+</html>
