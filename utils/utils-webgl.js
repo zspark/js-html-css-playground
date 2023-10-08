@@ -87,7 +87,7 @@ function createBuffer(gl, target, data, mode = undefined) {
 function setupBasicState(
     gl,
     width, height,
-    clearColor = [0, 0, 0, 1],
+    clearColor = [0.5, 0.5, 0.5, 1],
     clearStencil = 0
 ) {
     gl.viewport(0, 0, width, height);

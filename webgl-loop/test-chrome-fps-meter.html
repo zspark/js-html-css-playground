@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>webgl - loop</title>
+</head>
+
+<body>
+    <canvas width="1024" height="1024" id="my_Canvas"></canvas>
+
+    <script>
+        function setupBasicState(
+            gl,
+            width, height,
+            clearColor = [0.5, 0.5, 0.5, 1],
+            clearStencil = 0
+        ) {
+            gl.viewport(0, 0, width, height);
+            if (clearColor instanceof Array) {
+                gl.clearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+            } else {
+                gl.clearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+            }
+            gl.clearStencil(clearStencil);
+        }
+
+        function createProgram(gl, vertCode, fragCode) {
+            // Vertex shader source code
+            const vertShader = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vertShader, vertCode);
+            gl.compileShader(vertShader);
+
+
+            //Fragment shader source code
+            const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fragShader, fragCode);
+            gl.compileShader(fragShader);
+
+
+            // Create a shader program object to store combined shader program
+            const _prom = gl.createProgram();
+            gl.attachShader(_prom, vertShader);
+            gl.attachShader(_prom, fragShader);
+            gl.linkProgram(_prom);
+            if (!gl.getProgramParameter(_prom, gl.LINK_STATUS)) {
+
+                if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
+                    const message = gl.getShaderInfoLog(vertShader);
+                    if (message.length > 0) throw message;
+                }
+
+                if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
+                    const message = gl.getShaderInfoLog(fragShader);
+                    if (message.length > 0) throw message;
+                }
+
+                const info = gl.getProgramInfoLog(_prom);
+                if (info.length > 0) throw info;
+            }
+            return _prom;
+        }
+
+        function createBuffer(gl, target, data, mode = undefined) {
+            let _data;
+            if (data instanceof Array) {
+                _data = new Float32Array(data);
+            }
+            const _buf = gl.createBuffer();
+            gl.bindBuffer(target, _buf);
+            gl.bufferData(target, _data, mode ?? gl.STATIC_DRAW);
+            gl.bindBuffer(target, null);
+            return _buf;
+        }
+
+
+        function createPrimitive(){
+        }
+
+
+
+        ///================================================================================
+        /// start.
+        const vertCode = `
+attribute vec2 coordinates;
+void main(void) {
+    gl_Position = vec4(coordinates,0.0, 1.0);
+    //gl_PointSize = 10.0;
+}`;
+        const fragCode = `
+void main(void) {
+    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}`
+
+
+        const canvas = document.getElementById('my_Canvas');
+        const gl = canvas.getContext('webgl2');
+        setupBasicState(gl, canvas.width, canvas.height);
+        const shaderProgram = createProgram(gl, vertCode, fragCode);
+        gl.enable(gl.DEPTH_TEST);
+
+        const vertices = [-0.5, 0.5, -0.5, -0.5, 0.5, -0.5,];
+        const vertex_buffer = createBuffer(gl, gl.ARRAY_BUFFER, vertices);
+
+        gl.useProgram(shaderProgram);
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+        const coord = gl.getAttribLocation(shaderProgram, "coordinates");
+        gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(coord);
+
+        function _loop() {
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+            requestAnimationFrame(_loop);
+        }
+
+        requestAnimationFrame(_loop);
+    </script>
+</body>
+
+</html>
