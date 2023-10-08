@@ -3,48 +3,15 @@
 
 <head>
     <title>github pages test</title>
-    <script src='./utils/utils-webgl.js'></script>
 </head>
 
 <body>
-    <canvas width="1024" height="1024" id="my_Canvas"></canvas>
 
-    <script>
-        const vertCode = `
-attribute vec2 coordinates;
-void main(void) {
-    gl_Position = vec4(coordinates,0.0, 1.0);
-    //gl_PointSize = 10.0;
-}`;
-        const fragCode = `
-void main(void) {
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-}`
+    <iframe src="./webgl/index.html"
+        scrolling="no"
+        style=" width:100%; height:400px; border:none;"></iframe>
 
-        const WebGLUtil = window.WebGLUtil;
-        const canvas = document.getElementById('my_Canvas');
-        const gl = canvas.getContext('webgl2');
-        WebGLUtil.setupBasicState(gl, canvas.width, canvas.height);
-        const shaderProgram = WebGLUtil.createProgram(gl, vertCode, fragCode);
-        gl.enable(gl.DEPTH_TEST);
-
-        const vertices = [-0.5, 0.5, -0.5, -0.5, 0.5, -0.5,];
-        const vertex_buffer = WebGLUtil.createBuffer(gl, gl.ARRAY_BUFFER, vertices);
-
-        gl.useProgram(shaderProgram);
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-        const coord = gl.getAttribLocation(shaderProgram, "coordinates");
-        gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(coord);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-
-        // Draw the triangle
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
-        //gl.drawArrays(gl.LINES, 0, 3);
-        //gl.drawArrays(gl.LINE_STRIP, 0, 3);
-        //gl.drawArrays(gl.LINE_LOOP, 0, 3);
-        //gl.drawArrays(gl.POINTS, 0, 3);
-    </script>
+    <img sizes="(min-width: 768px) 100vw, (max-width: 910px) min(100%, 870px), (max-height: 755px) min(100%, 870px), (min-aspect-ratio: 6000/4000) calc((calc(100vh - 175px)) * 1.5), calc(100vw - 40px)" srcset="https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=870&amp;q=80 870w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=1170&amp;q=80 1170w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=1470&amp;q=80 1470w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=1740&amp;q=80 1740w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=1770&amp;q=80 1770w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=2070&amp;q=80 2070w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=2340&amp;q=80 2340w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=2370&amp;q=80 2370w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=2670&amp;q=80 2670w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=2940&amp;q=80 2940w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=2970&amp;q=80 2970w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=3270&amp;q=80 3270w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=3540&amp;q=80 3540w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=3570&amp;q=80 3570w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=3870&amp;q=80 3870w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=4140&amp;q=80 4140w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=4170&amp;q=80 4170w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=4470&amp;q=80 4470w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=4740&amp;q=80 4740w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=4770&amp;q=80 4770w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=5070&amp;q=80 5070w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=5340&amp;q=80 5340w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=5370&amp;q=80 5370w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=5670&amp;q=80 5670w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=5940&amp;q=80 5940w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=5970&amp;q=80 5970w, https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=6000&amp;q=80 6000w" src="https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=1000&amp;q=80" alt="woman with DSLR camera" class="tB6UZ a5VGX" style="aspect-ratio: 6000 / 4000;">
 </body>
 
 </html>
