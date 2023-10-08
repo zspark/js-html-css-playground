@@ -99,9 +99,16 @@ function setupBasicState(
     gl.clearStencil(clearStencil);
 }
 
+function resizeCanvas(canvas, w, h) {
+    canvas.width = w;
+    canvas.height = h ?? w;
+}
+
 globalThis.WebGLUtil = {
     setupBasicState,
     createBuffer,
     createProgram,
-    createTexture
+    createTexture,
+    resizeCanvas,
 }
+

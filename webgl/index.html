@@ -6,8 +6,8 @@
     <script src='../utils/utils-webgl.js'></script>
 </head>
 
-<body>
-    <canvas width="100%" height="100%" id="my_Canvas"></canvas>
+<body style="margin:0;">
+    <canvas id="my_Canvas"></canvas>
 
     <script>
         const vertCode = `
@@ -20,30 +20,39 @@ void main(void) {
 void main(void) {
     gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }`
-
+        const _canvas = document.getElementById('my_Canvas');
+        const _gl = _canvas.getContext('webgl2');
         const WebGLUtil = window.WebGLUtil;
-        const canvas = document.getElementById('my_Canvas');
-        const gl = canvas.getContext('webgl2');
-        WebGLUtil.setupBasicState(gl, canvas.width, canvas.height);
-        const shaderProgram = WebGLUtil.createProgram(gl, vertCode, fragCode);
-        gl.enable(gl.DEPTH_TEST);
+        window.addEventListener("resize", e => {
+            WebGLUtil.resizeCanvas(_canvas, window.document.body.clientWidth);
+            WebGLUtil.setupBasicState(_gl, _canvas.width, _canvas.height);
+            _render();
+        });
+        WebGLUtil.resizeCanvas(_canvas, window.document.body.clientWidth);
+        WebGLUtil.setupBasicState(_gl, _canvas.width, _canvas.height);
+        const _shaderProgram = WebGLUtil.createProgram(_gl, vertCode, fragCode);
+        _gl.enable(_gl.DEPTH_TEST);
 
-        const vertices = [-0.5, 0.5, -0.5, -0.5, 0.5, -0.5,];
-        const vertex_buffer = WebGLUtil.createBuffer(gl, gl.ARRAY_BUFFER, vertices);
+        function _render() {
+            _gl.clear(_gl.COLOR_BUFFER_BIT);
 
-        gl.useProgram(shaderProgram);
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-        const coord = gl.getAttribLocation(shaderProgram, "coordinates");
-        gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(coord);
-        gl.clear(gl.COLOR_BUFFER_BIT);
+            // Draw the triangle
+            _gl.drawArrays(_gl.TRIANGLES, 0, 3);
+            //_gl.drawArrays(_gl.LINES, 0, 3);
+            //_gl.drawArrays(_gl.LINE_STRIP, 0, 3);
+            //_gl.drawArrays(_gl.LINE_LOOP, 0, 3);
+            //_gl.drawArrays(_gl.POINTS, 0, 3);
+        }
 
-        // Draw the triangle
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
-        //gl.drawArrays(gl.LINES, 0, 3);
-        //gl.drawArrays(gl.LINE_STRIP, 0, 3);
-        //gl.drawArrays(gl.LINE_LOOP, 0, 3);
-        //gl.drawArrays(gl.POINTS, 0, 3);
+        const _vertices = [-0.5, 0.5, -0.5, -0.5, 0.5, -0.5,];
+        const _vertex_buffer = WebGLUtil.createBuffer(_gl, _gl.ARRAY_BUFFER, _vertices);
+
+        _gl.useProgram(_shaderProgram);
+        _gl.bindBuffer(_gl.ARRAY_BUFFER, _vertex_buffer);
+        const _coord = _gl.getAttribLocation(_shaderProgram, "coordinates");
+        _gl.vertexAttribPointer(_coord, 2, _gl.FLOAT, false, 0, 0);
+        _gl.enableVertexAttribArray(_coord);
+        _render();
     </script>
 </body>
 
