@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+    <title>ServerStressTesting</title>
+</head>
+
+<body>
+
+    <div id="buttons">
+        <input id="run" type="button" value="RUN"></input>
+    </div>
+
+    <hr>
+
+    <div>
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">server stress testing</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td> provider: </td>
+                    <td>
+                        <select id="provider">
+                            <option value="gaode">gaode</option>
+                            <option value="esri">esri</option>
+                            <option value="tianditu">tianditu</option>
+                            <option value="google">google</option>
+                            <option value="custom">custom</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td> requestsPerServer: </td>
+                    <td><input id="requestsPerServer" type="number" value=18></input></td>
+                </tr>
+                <tr>
+                    <td> shuffle mode: </td>
+                    <td>
+                        <input type="radio" id="mix" name="mode" checked></input> <label for="mix">mix</label>
+                        <input type="radio" id="stack" name="mode"></input> <label for="stack">stack</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td> </td>
+                    <td>
+                        <label style="background:#ff0000">
+                            'server' concat 'resource' is the final url to request.
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td> servers(array): </td>
+                    <td>
+                        <textarea id="arrServer" rows="5" cols="70"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td> resources(array): </td>
+                    <td>
+                        <textarea id="arrResource" rows="10" cols="70"></textarea>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div id='result'>
+    </div>
+
+    <script type="module">
+
+        const CONFIGS = Object.freeze({
+            gaode: {
+                /// 高德未提供0,5,6这些服务,目前来看就4个,如下;
+                arrServer: Object.freeze([
+                    'https://webst01.is.autonavi.com/appmaptile',
+                    'https://webst02.is.autonavi.com/appmaptile',
+                    'https://webst03.is.autonavi.com/appmaptile',
+                    'https://webst04.is.autonavi.com/appmaptile',
+                ]),
+                resourceTemplate: '?style=6&x={x}&y={y}&z={z}',
+            },
+            esri: {
+                arrServer: Object.freeze([
+                    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile',
+                ]),
+                resourceTemplate: '{z}/{y}/{x}',
+            },
+            tianditu: {
+                arrServer: Object.freeze([
+                    'http://t0.tianditu.gov.cn/img_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&tk=8f8b42d28892c98b613ad463e63d3638',
+                    'http://t1.tianditu.gov.cn/img_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&tk=8f8b42d28892c98b613ad463e63d3638',
+                    'http://t2.tianditu.gov.cn/img_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&tk=8f8b42d28892c98b613ad463e63d3638',
+                    'http://t3.tianditu.gov.cn/img_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&tk=8f8b42d28892c98b613ad463e63d3638',
+                ]),
+                resourceTemplate: '&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}',
+            },
+            google: {
+                arrServer: Object.freeze([
+                    'https://www.google.cn/maps/vt?lyrs=s@189&gl=cn',
+                ]),
+                resourceTemplate: '&x={x}&y={y}&z={z}',
+            },
+            custom: {
+                arrServer: Object.freeze([]),
+                resourceTemplate: "",
+            },
+        });
+
+        function _genResources(template, xs = 810, xe = 820, ys = 410, ye = 430, z = 10) {
+            const _arrResource = []
+            for (let x = xs; x <= xe; ++x) {
+                for (let y = ys; y <= ye; ++y) {
+                    _arrResource.push(template.replaceAll("{x}", x).replaceAll("{y}", y).replaceAll("{z}", z));
+                }
+            }
+            return _arrResource;
+        }
+
+        function _printResult(info) {
+            const _divElem = window.document.createElement("div");
+            _divElem.innerHTML = `<table>
+    <thead>
+        <tr> <th colspan="2">result</th> </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td> time spend: </td>
+            <td> ${info.endTime - info.startTime}(ms) / ${(info.endTime - info.startTime) / 1000}(s) </td>
+        </tr>
+        <tr>
+            <td> requesting count: </td>
+            <td> ${info.requestingCount} </td>
+        </tr>
+        <tr>
+            <td> total size: </td>
+            <td> ${info.totalResourceSizeInBytes}(Bytes) / ${info.totalResourceSizeInBytes / 1024}(KiB) / ${info.totalResourceSizeInBytes / 1024 / 1024}(MiB)</td>
+        </tr>
+    </tbody>
+</table>`
+            _body.querySelector("#result").prepend(_divElem);
+        }
+
+
+        const PROVIDER = Object.freeze({
+            GAODE: "gaode",
+            ESRI: "esri",
+            TIANDITU: "tianditu",
+            GOOGLE: "google",
+            CUSTOM: "custom",
+        });
+        const SHUFFLE_MODE = Object.freeze({
+            STACK: "stack",
+            MIX: "mix",
+        });
+
+        const SHUFFLES = Object.freeze({
+            "stack": _shuffle_stack,
+            "mix": _shuffle_mix,
+        });
+
+        function _request(serverPath, resource, cbFn) {
+            const _url = serverPath ? `${serverPath}/${resource}` : resource;
+            const _xhr = new XMLHttpRequest();
+            _xhr.serverPath = serverPath;
+            _xhr.open("GET", _url, true); ///open(method, url, async, user, password)
+            //_xhr.setRequestHeader(key, headers[key]);
+            //_xhr.overrideMimeType(overrideMimeType);
+            //_xhr.withCredentials = true;
+            //_xhr.setRequestHeader('Connection','keep-alive');/// chrome say: Refused to set unsafe header "Connection"
+            //_xhr.setRequestHeader('Server-Timing',"app;dur=47.2, db;dur=53");
+            _xhr.responseType = "arraybuffer";
+            ////_xhr.responseType = "blob";
+            ////_xhr.responseType = "json";
+
+            //_xhr.onerror = () => { }
+            _xhr.onabort = () => {console.log("aborted");}
+            _xhr.onloadend = (evt) => {
+                if (_xhr.status === 200) {
+                    _performance.totalResourceSizeInBytes += evt.loaded;
+                    cbFn(true, _xhr);
+                } else {
+                    console.error(`DONE, but:
+url: ${_url}
+status: ${_xhr.status}
+readyState: ${_xhr.readyState}`);
+                    cbFn(false, _xhr);
+                }
+            };
+
+            _xhr.send();
+
+            ++_performance.requestingCount;
+            return _xhr;
+        }
+
+        function _shuffle_mix(arrServer, requestsPerServer) {
+            const _arr = [];
+            for (let i = 0; i < requestsPerServer; ++i) {arrServer.forEach(server => {_arr.push(server);})};
+            return _arr;
+        }
+        function _shuffle_stack(arrServer, requestsPerServer) {
+            const _arr = [];
+            arrServer.forEach(server => {for (let i = 0; i < requestsPerServer; ++i) {_arr.push(server);} });
+            return _arr;
+        }
+
+
+        const _performance = {
+            startTime: 0,
+            endTime: 0,
+            requestingCount: 0,
+            totalResourceSizeInBytes: 0,
+        };
+
+        function _run(arrResource, options) {
+            if (arrResource.length <= 0) return;
+
+            _performance.startTime = Date.now();
+            _performance.requestingCount = _performance.totalResourceSizeInBytes = 0;
+
+            const _totalCount = arrResource.length;
+            let _finishedCount = 0;
+
+            function _done(hasData, xhr) {
+                ++_finishedCount;
+                if (_finishedCount === _totalCount) {
+                    _performance.endTime = Date.now();
+                    console.log(`finished loading`);
+                    _printResult(_performance);
+                    _buttonsElem.append(_runElem);
+                    return;
+                }
+                const _r = arrResource.shift();
+                if (!_r) return;
+
+                _request(xhr.serverPath, _r, _done);
+            }
+
+            if (options.arrServer.length > 0) {
+                const _arrServerShuffled = SHUFFLES[options.shuffleMode](options.arrServer, options.requestsPerServer);
+                const _N = Math.min(_arrServerShuffled.length, _totalCount);
+                for (let i = 0; i < _N; ++i) {
+                    const _r = arrResource.shift();
+                    _request(_arrServerShuffled[i], _r, _done);
+                };
+            } else {
+                const _N = Math.min(options.requestsPerServer, _totalCount);
+                for (let i = 0; i < _N; ++i) {
+                    const _r = arrResource.shift();
+                    _request(undefined, _r, _done);
+                };
+            }
+
+        }
+
+
+        function _textareaContentToArray(elem) {
+            const _str = elem.value.trim();
+            const _out = [];
+            if (_str === "") return _out;
+
+            _str.split("\n").forEach(v => {
+                const _m = /\s*(['"])?(.*)\1?\s*/ig.exec(v);
+                if (_m && _m.length >= 3) {
+                    _out.push(_m[2]);
+                }
+            });
+            return _out;
+        }
+
+
+        const _body = window.document.body;
+        const _providerElem = _body.querySelector("#provider");
+        const _requestsPerServerElem = _body.querySelector("#requestsPerServer");
+        const _shuffleModeMixElem = _body.querySelector("#mix");
+        const _serverListElem = _body.querySelector("#arrServer");
+        const _resourceListElem = _body.querySelector("#arrResource");
+        const _buttonsElem = _body.querySelector("#buttons");
+        const _runElem = _body.querySelector("#run");
+
+
+        function setProvider(p) {
+            const _config = CONFIGS[p];
+            _serverListElem.value = _config.arrServer.join('\n');
+            const _arrRes = _genResources(_config.resourceTemplate);
+            _resourceListElem.value = _arrRes.join('\n');
+
+        }
+        _providerElem.onchange = (evt) => {
+            const _provider = evt.target.value;
+            setProvider(_provider);
+        }
+        setProvider(PROVIDER.GAODE);
+
+
+        _runElem.onclick = () => {
+            _runElem.remove();
+
+            const arrResource = _textareaContentToArray(_resourceListElem);
+            const arrServer = _textareaContentToArray(_serverListElem);
+            const requestsPerServer = Math.max(_requestsPerServerElem.value, 1);
+            const shuffleMode = _shuffleModeMixElem.checked ? SHUFFLE_MODE.MIX : SHUFFLE_MODE.STACK;
+
+            _run(arrResource, {arrServer, requestsPerServer, shuffleMode});
+        }
+
+    </script>
+</body>
+
+</html>
